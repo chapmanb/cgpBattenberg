@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/cm/shared/apps/bcbio/20141204-devel/data/anaconda/bin/perl
 
 ##########LICENCE##########
 # Copyright (c) 2014,2015 Genome Research Ltd.
@@ -171,6 +171,11 @@ sub setup {
 
 	pod2usage(-msg  => "\nERROR: Options must be defined.\n", -verbose => 2,  -output => \*STDERR) unless($defined);
 
+  # Setup defaults required for processing before final settings at end of function
+  my $tmpdir = File::Spec->catdir($opts{'outdir'}, 'tmpBattenberg');
+  make_path($tmpdir) unless(-d $tmpdir);
+  $opts{'tmp'} = $tmpdir;
+  $opts{'mbq'} = $DEFAULT_ALLELE_COUNT_MBQ if(!exists($opts{'mbq'}) || !defined($opts{'mbq'}));
 
   if(defined $opts{'allele-counts'}) {
     for my $bam_opt((qw(tumbam normbam))) {
@@ -263,9 +268,6 @@ sub setup {
 	$opts{'threads'} = 1 unless(defined $opts{'threads'});
 
 	#Create the results directory in the output directory given.
-	my $tmpdir = File::Spec->catdir($opts{'outdir'}, 'tmpBattenberg');
-	make_path($tmpdir) unless(-d $tmpdir);
-	$opts{'tmp'} = $tmpdir;
 	my $resultsdir = File::Spec->catdir($opts{'tmp'}, 'results');
 	make_path($resultsdir) unless(-d $resultsdir);
 	#directory to store progress reports
@@ -288,8 +290,6 @@ sub setup {
 	}
 
 	#Setup default values if they're not set at commandline
-
-	$opts{'mbq'} = $DEFAULT_ALLELE_COUNT_MBQ if(!exists($opts{'mbq'}) || !defined($opts{'mbq'}));
 	$opts{'seg_gamma'} = $DEFAULT_SEGMENTATION_GAMMA if(!exists($opts{'seg_gamma'}) || !defined($opts{'seg_gamma'}));
 	$opts{'phase_gamma'} = $DEFAULT_PHASING_GAMMA if(!exists($opts{'phase_gamma'}) || !defined($opts{'phase_gamma'}));
 	$opts{'clonality_dist'} = $DEFAULT_CLONALITY_DIST if(!exists($opts{'clonality_dist'}) || !defined($opts{'clonality_dist'}));
